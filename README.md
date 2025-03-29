@@ -1,0 +1,1 @@
+This is a static site generator for a Boot.dev guided project.
