@@ -26,46 +26,26 @@ class TextNode:
     def __repr__(self):
         return f"TextNode({self.text}, {self.text_type}, {self.url})"
     
-
-    # Probably still need to figure out how to handles newlines in code markdown.
-    # I made this way harder than it needed to be. Next time split on delimiter.
-    # Ok actually I need to fix this. This stips whitespace and doesn't work.
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     nodes = []
 
     for node in old_nodes:
-
         if node.text_type != TextType.TEXT:
             nodes.append(node)
-        else:    
-            node_start_index = 0
-            node_current_index = -1
-            delimiter_found = False
-            words = node.text.split()
-
-            for word in words:
-                node_current_index += 1
-
-                if word.startswith(delimiter):
-                    # Prevent trying to create an empty node if delimiter is at start of node.
-                    if node_current_index != 0:
-                        nodes.append(TextNode(" ".join(words[node_start_index:node_current_index]), TextType.TEXT))
-                    node_start_index = node_current_index
-                    delimiter_found = True
-
-                if word.endswith(delimiter) and delimiter_found == True:
-                    line = " ".join(words[node_start_index:node_current_index + 1])
-                    nodes.append(TextNode(line.strip(delimiter), text_type))
-                    # Set start index to next word.
-                    node_start_index = node_current_index + 1
-                    delimiter_found = False
-
-                if node_current_index == len(words) - 1:
-                    if delimiter_found == True:
-                        raise Exception(f"Invalid Markdown syntax. Missing closing {delimiter}.")
-                    if node_start_index <= node_current_index:
-                        nodes.append(TextNode(" ".join(words[node_start_index:]), TextType.TEXT))
-
+            continue
+        split_text = node.text.split(delimiter)
+        if len(split_text) == 0:
+            nodes.append(node)
+            continue
+        if len(split_text) % 2 == 0:
+            raise Exception("Invalid markdown. Formatted section not closed.")
+        for i in range(len(split_text)):
+            if split_text[i] == "":
+                continue
+            if i % 2 == 1:
+                nodes.append(TextNode(split_text[i], text_type))
+            else:
+                nodes.append(TextNode(split_text[i], TextType.TEXT))
     return nodes
 
 def extract_markdown_images(text):
@@ -130,7 +110,7 @@ def split_single_node_link(node_text, links):
 
 def text_to_textnodes(text):
     nodes = [TextNode(text, TextType.TEXT)]
-    nodes = split_nodes_delimiter(nodes, "*", TextType.BOLD)
+    nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
     nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC)
     nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
     nodes = split_nodes_image(nodes)
