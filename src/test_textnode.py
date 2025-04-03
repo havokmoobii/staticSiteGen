@@ -1,7 +1,7 @@
 import unittest
 
 from textnode import TextNode, TextType
-from from_markdown import markdown_to_blocks, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes
+from from_markdown import BlockType, markdown_to_blocks, block_to_block_type, split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
@@ -126,6 +126,18 @@ class TestTextNode(unittest.TestCase):
                 "- This is a list\n- with items",
             ],
         )
+
+    def test_block_to_block_type(self):
+        self.assertEqual(block_to_block_type("Things\n#and other things\nand even more things"), BlockType.PARAGRAPH)
+        self.assertEqual(block_to_block_type("#Things\nand other things\nand even more things"), BlockType.HEADING)
+        self.assertEqual(block_to_block_type("```#Things\nand other things\nand even more things```"), BlockType.CODE)
+        self.assertEqual(block_to_block_type("```#Things\nand other things\nand even more things``"), BlockType.PARAGRAPH)
+        self.assertEqual(block_to_block_type(">#Things\n> and other things\n> and even more things"), BlockType.QUOTE)
+        self.assertEqual(block_to_block_type("> #Things\n- and other things\n>and even more things"), BlockType.PARAGRAPH)
+        self.assertEqual(block_to_block_type("- #Things\n- and other things\n- and even more things"), BlockType.UNORDERED_LIST)
+        self.assertEqual(block_to_block_type("- #Things\n-and other things\n- and even more things"), BlockType.PARAGRAPH)
+        self.assertEqual(block_to_block_type("1. Things\n2. and other things\n3. and even more things"), BlockType.ORDERED_LIST)
+        self.assertEqual(block_to_block_type("0. Things\n1. and other things\n2. and even more things"), BlockType.PARAGRAPH)
 
 if __name__ == "__main__":
     unittest.main()

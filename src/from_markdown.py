@@ -1,6 +1,15 @@
+from enum import Enum
 from textnode import TextNode, TextType
 # For extract_markdown_images(text) and extract_markdown_links(text)
 import re
+
+class BlockType(Enum):
+    PARAGRAPH = "paragraph"
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UNORDERED_LIST = "unordered list"
+    ORDERED_LIST = "ordered list"
 
 def markdown_to_blocks(markdown):
     sections = markdown.split("\n\n")
@@ -17,6 +26,28 @@ def markdown_to_blocks(markdown):
                 stripped_section = stripped_section + "\n" + line.strip()
         blocks.append(stripped_section.strip())
     return blocks
+
+def block_to_block_type(block):
+    if block.startswith("#"):
+        return BlockType.HEADING
+    if block.startswith("```") and block.endswith("```"):
+        return BlockType.CODE
+    lines = block.split("\n")
+    quote, unordered, ordered = True, True, True
+    for i in range(len(lines)):
+        if not lines[i].startswith(">"):
+            quote = False
+        if not lines[i].startswith("- "):
+            unordered = False
+        if not lines[i].startswith(f"{i+1}. "):
+            ordered = False
+    if quote:
+        return BlockType.QUOTE
+    if unordered:
+        return BlockType.UNORDERED_LIST
+    if ordered:
+        return BlockType.ORDERED_LIST
+    return BlockType.PARAGRAPH
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     nodes = []
