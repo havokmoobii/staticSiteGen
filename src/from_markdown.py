@@ -24,7 +24,8 @@ def markdown_to_blocks(markdown):
                 stripped_section = line.strip()
             else:
                 stripped_section = stripped_section + "\n" + line.strip()
-        blocks.append(stripped_section.strip())
+        if stripped_section != "":
+            blocks.append(stripped_section.strip())
     return blocks
 
 def block_to_block_type(block):
