@@ -9,11 +9,10 @@ class HTMLNode:
         raise NotImplementedError
     
     def props_to_html(self):
-        if self.props == None:
-            raise Exception("props_to_html() can only be called by instances with a 'props' data member.")
         output = ""
-        for prop in self.props:
-            output += f'{prop}="{self.props[prop]}" '
+        if self.props != None:
+            for prop in self.props:
+                output += f'{prop}="{self.props[prop]}" '
         return output.rstrip()
     
     def __eq__(self, other):
@@ -21,3 +20,16 @@ class HTMLNode:
     
     def __repr__(self):
         return f"HTMLNode({self.tag}, {self.value}, {self.children}, {self.props})"
+    
+class LeafNode(HTMLNode):
+    def __init__(self, tag, value, props=None):
+        super().__init__(tag, value, None, props)
+
+    def to_html(self):
+        if self.value == None:
+            raise ValueError("LeafNode must have a value.")
+        if self.tag == None:
+            return self.value
+        if self.props == None:
+            return f"<{self.tag}>{self.value}</{self.tag}>"
+        return f"<{self.tag} {self.props_to_html()}>{self.value}</{self.tag}>"
