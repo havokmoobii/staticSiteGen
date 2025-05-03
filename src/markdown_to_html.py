@@ -130,3 +130,12 @@ def block_to_tag(block, block_type):
             return "ol"
         case _:
             raise Exception("Invalid BlockType")
+    
+def extract_title(markdown):
+    if not "# " in markdown:
+        raise Exception("Invalid Markdown. Missing h1 header")
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        if block.startswith("# "):
+            return block.strip("# ").strip()
+    raise Exception("Invalid Markdown. h1 header not at beginning of block")

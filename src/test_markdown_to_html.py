@@ -1,6 +1,6 @@
 import unittest
 
-from markdown_to_html import BlockType, markdown_to_blocks, block_to_block_type, block_to_tag, markdown_to_html_node
+from markdown_to_html import BlockType, markdown_to_blocks, block_to_block_type, block_to_tag, markdown_to_html_node, extract_title
 
 class TestMarkdownToBlocks(unittest.TestCase):
     def test_eq(self):
@@ -198,6 +198,40 @@ the **same** even with inline stuff
         )
 
 
+class TestExtractTitle(unittest.TestCase):
+    def test_valid(self):
+        md = """
+
+1. _This is italic text with a heading._
+2. **This is bold text with a heading.**
+
+# This is regular text with a heading.
+
+"""
+        title = extract_title(md)
+        self.assertEqual(title, "This is regular text with a heading.")
+
+    def test_missing(self):
+        md = """
+
+1. _This is italic text with a heading._
+2. **This is bold text with a heading.**
+
+This is regular text without a heading.
+
+"""
+        self.assertRaises(Exception, extract_title, md)
+
+    def test_misplaced(self):
+        md = """
+
+1. _This is italic text with a heading._
+2. **This is bold text with a heading.**
+
+This # is regular text without a heading.
+
+"""
+        self.assertRaises(Exception, extract_title, md)
 
 if __name__ == "__main__":
     unittest.main()
